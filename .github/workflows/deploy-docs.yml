@@ -1,11 +1,9 @@
 # Deploy the Hugo docs site to GitHub Pages.
 #
-# The docs are the whole Pages site, served at https://jbouder.github.io/tasktracker/.
+# The docs are the whole Pages site, served at https://jbouder.github.io/tasktracker-hugo/.
 #
-# The build resolves the Nebari theme by checking out
-# github.com/nebari-dev/nebari-docs-hugo as a sibling and pointing Hugo at it via
-# HUGO_MODULE_REPLACEMENTS. Once the theme is published & tagged, you can instead
-# pin a version in docs/go.mod and drop the theme checkout + the env var.
+# The Nebari theme is consumed as a published Hugo Module (pinned in docs/go.mod);
+# Go (set up below) fetches it and Hugo auto-downloads its transitive Hextra dep.
 name: Deploy Docs to GitHub Pages
 
 on:
@@ -35,12 +33,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Checkout Nebari docs theme
-        uses: actions/checkout@v4
-        with:
-          repository: nebari-dev/nebari-docs-hugo
-          path: _nebari-docs-hugo
-
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
@@ -56,11 +48,7 @@ jobs:
         working-directory: docs
         env:
           HUGO_ENV: production
-          # Resolve the theme from the sibling checkout above (absolute path).
-          HUGO_MODULE_REPLACEMENTS: "github.com/nebari-dev/nebari-docs-hugo -> ${{ github.workspace }}/_nebari-docs-hugo"
-        run: |
-          hugo mod get github.com/imfing/hextra
-          hugo --gc --minify --baseURL "https://jbouder.github.io/tasktracker/"
+        run: hugo --gc --minify --baseURL "https://jbouder.github.io/tasktracker-hugo/"
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
