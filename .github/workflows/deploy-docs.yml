@@ -1,0 +1,82 @@
+# Deploy the Hugo docs site to GitHub Pages.
+#
+# The docs are the whole Pages site, served at https://jbouder.github.io/tasktracker/.
+#
+# The build resolves the Nebari theme by checking out
+# github.com/nebari-dev/nebari-docs-hugo as a sibling and pointing Hugo at it via
+# HUGO_MODULE_REPLACEMENTS. Once the theme is published & tagged, you can instead
+# pin a version in docs/go.mod and drop the theme checkout + the env var.
+name: Deploy Docs to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - docs/**
+      - .github/workflows/deploy-docs.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  HUGO_VERSION: 0.163.3
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Checkout Nebari docs theme
+        uses: actions/checkout@v4
+        with:
+          repository: nebari-dev/nebari-docs-hugo
+          path: _nebari-docs-hugo
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: ${{ env.HUGO_VERSION }}
+          extended: true
+
+      - name: Build docs
+        working-directory: docs
+        env:
+          HUGO_ENV: production
+          # Resolve the theme from the sibling checkout above (absolute path).
+          HUGO_MODULE_REPLACEMENTS: "github.com/nebari-dev/nebari-docs-hugo -> ${{ github.workspace }}/_nebari-docs-hugo"
+        run: |
+          hugo mod get github.com/imfing/hextra
+          hugo --gc --minify --baseURL "https://jbouder.github.io/tasktracker/"
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/public
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

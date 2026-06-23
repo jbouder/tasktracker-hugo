@@ -1,0 +1,65 @@
+# TaskTracker documentation site.
+# Thin consumer of the reusable Nebari Hugo theme — content + config only.
+# All branding/theming comes from the imported nebari-docs-hugo module.
+
+baseURL = "https://jbouder.github.io/tasktracker/"
+title = "TaskTracker Docs"
+enableGitInfo = true
+enableRobotsTXT = true
+
+[module]
+  [module.hugoVersion]
+    min = "0.146.0"
+  # The Nebari theme. It in turn imports Hextra.
+  # For local development, go.mod has a `replace` pointing at ../../nebari-docs-hugo.
+  [[module.imports]]
+    path = "github.com/nebari-dev/nebari-docs-hugo"
+
+[markup]
+  [markup.highlight]
+    noClasses = false
+  [markup.goldmark.renderer]
+    unsafe = true   # allow raw HTML in markdown (Hextra shortcodes/callouts)
+
+[params]
+  description = "Documentation for TaskTracker — a FastAPI + React task tracking app."
+
+  [params.navbar]
+    displayTitle = true
+    displayLogo = true
+
+  [params.page]
+    width = "normal"
+
+  [params.theme]
+    default = "system"   # follow OS; user can toggle
+    displayToggle = true
+
+  [params.footer]
+    enable = true
+    displayCopyright = true
+    displayPoweredBy = false
+
+  [params.search]
+    enable = true
+    type = "flexsearch"
+    [params.search.flexsearch]
+      index = "content"
+      tokenize = "forward"
+
+  [params.editURL]
+    enable = true
+    base = "https://github.com/jbouder/tasktracker-hugo/edit/main/docs/content"
+
+# Top navbar links
+[menu]
+  [[menu.main]]
+    name = "Docs"
+    pageRef = "/docs"
+    weight = 1
+  [[menu.main]]
+    name = "GitHub"
+    url = "https://github.com/jbouder/tasktracker-hugo"
+    weight = 2
+    [menu.main.params]
+      icon = "github"

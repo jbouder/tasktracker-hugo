@@ -1,0 +1,11 @@
+# Development-only overrides (applied by `hugo server` and `hugo --environment development`).
+# Resolve the Nebari theme from a local sibling checkout so you can iterate on the
+# theme and the docs together before the theme is published as a module.
+#
+# In production (CI deploy) this file is NOT applied; the theme resolves from the
+# published module instead. See .github/workflows/deploy-pages.yml.
+
+# Note: Hugo resolves relative replacement paths against the project's themes/
+# directory (docs/themes), hence the extra "../".
+[module]
+  replacements = "github.com/nebari-dev/nebari-docs-hugo -> ../../../nebari-docs-hugo"
