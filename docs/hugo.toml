@@ -29,7 +29,7 @@ enableRobotsTXT = true
     displayLogo = true
 
   [params.page]
-    width = "normal"
+    width = "full"
 
   [params.theme]
     default = "system"   # follow OS; user can toggle
